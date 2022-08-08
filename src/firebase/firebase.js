@@ -1,0 +1,10 @@
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import firebaseProdConfig from "./firebaseConfig-prod.json";
+import firebaseDevConfig from "./firebaseConfig-dev.json";
+const isDev = () => true;
+const firebaseConfig = isDev() ? firebaseDevConfig : firebaseProdConfig;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+export { firebaseConfig, auth };
+export default app;
