@@ -32,7 +32,7 @@ export function SearchBar(props) {
               boxShadow: "none",
             }}
             icon={<SearchIcon color={searchIconColor} w="15px" h="15px" />}
-          ></IconButton>
+          />
         }
       />
       <Input
