@@ -43,5 +43,6 @@ export default {
         {},
         false
       ),
+    getAllUsers: () => fetchData("GET", `${BASE_URL}/user/admin/getAllUsers`),
   },
 };

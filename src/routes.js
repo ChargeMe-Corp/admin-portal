@@ -58,7 +58,7 @@ const routes = [
   {
     name: "Profile",
     layout: "/admin",
-    path: "/profile",
+    path: "/profile/:userId",
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: Profile,
   },

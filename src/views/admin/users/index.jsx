@@ -1,28 +1,5 @@
-/*!
-  _   _  ___  ____  ___ ________  _   _   _   _ ___   
- | | | |/ _ \|  _ \|_ _|__  / _ \| \ | | | | | |_ _| 
- | |_| | | | | |_) || |  / / | | |  \| | | | | || | 
- |  _  | |_| |  _ < | | / /| |_| | |\  | | |_| || |
- |_| |_|\___/|_| \_\___/____\___/|_| \_|  \___/|___|
-                                                                                                                                                                                                                                                                                                                                       
-=========================================================
-* Horizon UI - v1.1.0
-=========================================================
-
-* Product Page: https://www.horizon-ui.com/
-* Copyright 2022 Horizon UI (https://www.horizon-ui.com/)
-
-* Designed and Coded by Simmmple
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
-// Chakra imports
 import { Box, SimpleGrid } from "@chakra-ui/react";
-import DevelopmentTable from "./components/DevelopmentTable";
+import UsersTable from "./components/UsersTable";
 import CheckTable from "views/admin/dataTables/components/CheckTable";
 import ColumnsTable from "views/admin/dataTables/components/ColumnsTable";
 import ComplexTable from "views/admin/dataTables/components/ComplexTable";
@@ -36,29 +13,71 @@ import tableDataDevelopment from "views/admin/dataTables/variables/tableDataDeve
 import tableDataCheck from "views/admin/dataTables/variables/tableDataCheck.json";
 import tableDataColumns from "views/admin/dataTables/variables/tableDataColumns.json";
 import tableDataComplex from "views/admin/dataTables/variables/tableDataComplex.json";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import api from "../../../api";
+import Loader from "../../../components/loader/loader";
+const columns = [
+  {
+    Header: "FIRST NAME",
+    accessor: "firstName",
+  },
+  {
+    Header: "LAST NAME",
+    accessor: "lastName",
+  },
+  {
+    Header: "PHONE",
+    accessor: "phoneNumber",
+  },
+  {
+    Header: "CURRENT PB",
+    accessor: "pbNum",
+  },
+];
 
-export default function Settings() {
-  // Chakra Color Mode
+export default function UsersPage() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const fetchUser = async () => {
+      setLoading(true);
+      try {
+        const fetchedUsers = await api.users.getAllUsers();
+        const mappedUsers = fetchedUsers.map((user) => ({
+          ...user,
+          pbNum: user.powerbanks.length,
+        }));
+        setUsers(mappedUsers);
+        setLoading(false);
+      } catch (e) {
+        console.log(e);
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
+  const handleRemove = (userId) => async () => {
+    setLoading(true);
+    try {
+      console.log(userId);
+      setLoading(false);
+    } catch (e) {
+      console.log(e);
+      setLoading(false);
+    }
+  };
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
+      <Loader loading={loading} />
       <SimpleGrid
         mb="20px"
         columns={{ sm: 1, md: 1 }}
         spacing={{ base: "20px", xl: "20px" }}
       >
-        <DevelopmentTable
-          columnsData={columnsDataDevelopment}
-          tableData={tableDataDevelopment}
-        />
-        <CheckTable columnsData={columnsDataCheck} tableData={tableDataCheck} />
-        <ColumnsTable
-          columnsData={columnsDataColumns}
-          tableData={tableDataColumns}
-        />
-        <ComplexTable
-          columnsData={columnsDataComplex}
-          tableData={tableDataComplex}
+        <UsersTable
+          columnsData={columns}
+          tableData={users}
+          handleRemove={handleRemove}
         />
       </SimpleGrid>
     </Box>
