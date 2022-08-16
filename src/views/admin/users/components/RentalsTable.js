@@ -1,7 +1,9 @@
+/* eslint-disable */
 import {
   Flex,
+  Icon,
+  Progress,
   Table,
-  Checkbox,
   Tbody,
   Td,
   Text,
@@ -10,6 +12,10 @@ import {
   Tr,
   useColorModeValue,
 } from "@chakra-ui/react";
+// Custom components
+import Card from "components/card/Card";
+import { AndroidLogo, AppleLogo, WindowsLogo } from "components/icons/Icons";
+import Menu from "components/menu/MainMenu";
 import React, { useMemo } from "react";
 import {
   useGlobalFilter,
@@ -17,16 +23,15 @@ import {
   useSortBy,
   useTable,
 } from "react-table";
+import { MainMenu } from "../../../../components/menu";
+import { FiArrowUp, FiArrowDown } from "react-icons/fi";
 
-// Custom components
-import Card from "components/card/Card";
-import Menu from "components/menu/MainMenu";
-export default function CheckTable(props) {
-  const { columnsData, tableData } = props;
+import { useHistory } from "react-router-dom";
 
+export default function RentalsTable({ columnsData, tableData, handleRemove }) {
   const columns = useMemo(() => columnsData, [columnsData]);
   const data = useMemo(() => tableData, [tableData]);
-
+  const history = useHistory();
   const tableInstance = useTable(
     {
       columns,
@@ -45,10 +50,11 @@ export default function CheckTable(props) {
     prepareRow,
     initialState,
   } = tableInstance;
-  initialState.pageSize = 11;
-
+  initialState.pageSize = 5;
   const textColor = useColorModeValue("secondaryGray.900", "white");
+  const iconColor = useColorModeValue("secondaryGray.500", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
+
   return (
     <Card
       direction="column"
@@ -56,17 +62,9 @@ export default function CheckTable(props) {
       px="0px"
       overflowX={{ sm: "scroll", lg: "hidden" }}
     >
-      <Flex px="25px" justify="space-between" mb="20px" align="center">
-        <Text
-          color={textColor}
-          fontSize="22px"
-          fontWeight="700"
-          lineHeight="100%"
-        >
-          Check Table
-        </Text>
-        <Menu />
-      </Flex>
+      <Text color={textColor} fontSize="xl" fontWeight="700" align={"center"}>
+        Rentals
+      </Text>
       <Table {...getTableProps()} variant="simple" color="gray.500" mb="24px">
         <Thead>
           {headerGroups.map((headerGroup, index) => (
@@ -85,6 +83,12 @@ export default function CheckTable(props) {
                     color="gray.400"
                   >
                     {column.render("Header")}
+                    {column.isSorted && column.isSortedDesc !== null && (
+                      <Icon
+                        as={column.isSortedDesc ? FiArrowUp : FiArrowDown}
+                        color="gray.400"
+                      />
+                    )}
                   </Flex>
                 </Th>
               ))}
@@ -97,46 +101,6 @@ export default function CheckTable(props) {
             return (
               <Tr {...row.getRowProps()} key={index}>
                 {row.cells.map((cell, index) => {
-                  let data = "";
-                  if (cell.column.Header === "NAME") {
-                    data = (
-                      <Flex align="center">
-                        <Checkbox
-                          defaultChecked={cell.value[1]}
-                          colorScheme="brandScheme"
-                          me="10px"
-                        />
-                        <Text color={textColor} fontSize="sm" fontWeight="700">
-                          {cell.value[0]}
-                        </Text>
-                      </Flex>
-                    );
-                  } else if (cell.column.Header === "PROGRESS") {
-                    data = (
-                      <Flex align="center">
-                        <Text
-                          me="10px"
-                          color={textColor}
-                          fontSize="sm"
-                          fontWeight="700"
-                        >
-                          {cell.value}%
-                        </Text>
-                      </Flex>
-                    );
-                  } else if (cell.column.Header === "QUANTITY") {
-                    data = (
-                      <Text color={textColor} fontSize="sm" fontWeight="700">
-                        {cell.value}
-                      </Text>
-                    );
-                  } else if (cell.column.Header === "DATE") {
-                    data = (
-                      <Text color={textColor} fontSize="sm" fontWeight="700">
-                        {cell.value}
-                      </Text>
-                    );
-                  }
                   return (
                     <Td
                       {...cell.getCellProps()}
@@ -145,10 +109,20 @@ export default function CheckTable(props) {
                       minW={{ sm: "150px", md: "200px", lg: "auto" }}
                       borderColor="transparent"
                     >
-                      {data}
+                      <Text color={textColor} fontSize="sm" fontWeight="700">
+                        {cell.value}
+                      </Text>
                     </Td>
                   );
                 })}
+                <Td fontSize={{ sm: "14px" }} borderColor="transparent">
+                  <MainMenu
+                    onEdit={() =>
+                      history.push(`/admin/profile/${row.original.firebaseId}`)
+                    }
+                    onRemove={handleRemove(row.original.firebaseId)}
+                  />
+                </Td>
               </Tr>
             );
           })}

@@ -45,4 +45,8 @@ export default {
       ),
     getAllUsers: () => fetchData("GET", `${BASE_URL}/user/admin/getAllUsers`),
   },
+  rentals: {
+    getCurrentRentals: () =>
+      fetchData("GET", `${BASE_URL}/station/admin/getCurrentRentals`),
+  },
 };

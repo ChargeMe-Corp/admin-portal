@@ -66,6 +66,9 @@ export default function DevelopmentTable({
       px="0px"
       overflowX={{ sm: "scroll", lg: "hidden" }}
     >
+      <Text color={textColor} fontSize="xl" fontWeight="700" align={'center'}>
+        Users
+      </Text>
       <Table {...getTableProps()} variant="simple" color="gray.500" mb="24px">
         <Thead>
           {headerGroups.map((headerGroup, index) => (

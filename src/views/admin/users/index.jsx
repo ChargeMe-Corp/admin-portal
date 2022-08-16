@@ -1,21 +1,10 @@
 import { Box, SimpleGrid } from "@chakra-ui/react";
 import UsersTable from "./components/UsersTable";
-import CheckTable from "views/admin/dataTables/components/CheckTable";
-import ColumnsTable from "views/admin/dataTables/components/ColumnsTable";
-import ComplexTable from "views/admin/dataTables/components/ComplexTable";
-import {
-  columnsDataDevelopment,
-  columnsDataCheck,
-  columnsDataColumns,
-  columnsDataComplex,
-} from "views/admin/dataTables/variables/columnsData";
-import tableDataDevelopment from "views/admin/dataTables/variables/tableDataDevelopment.json";
-import tableDataCheck from "views/admin/dataTables/variables/tableDataCheck.json";
-import tableDataColumns from "views/admin/dataTables/variables/tableDataColumns.json";
-import tableDataComplex from "views/admin/dataTables/variables/tableDataComplex.json";
 import React, { useEffect, useState } from "react";
 import api from "../../../api";
 import Loader from "../../../components/loader/loader";
+import RentalsTable from "./components/RentalsTable";
+import moment from "moment";
 const columns = [
   {
     Header: "FIRST NAME",
@@ -34,9 +23,28 @@ const columns = [
     accessor: "pbNum",
   },
 ];
+const rentalColumns = [
+  {
+    Header: "NAME",
+    accessor: "userName",
+  },
+  {
+    Header: "PHONE",
+    accessor: "holdingUser.phoneNumber",
+  },
+  {
+    Header: "TOTAL PRICE",
+    accessor: "currentPrice",
+  },
+  {
+    Header: "START STATION",
+    accessor: "startStation.title",
+  },
+];
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
+  const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     const fetchUser = async () => {
@@ -45,7 +53,7 @@ export default function UsersPage() {
         const fetchedUsers = await api.users.getAllUsers();
         const mappedUsers = fetchedUsers.map((user) => ({
           ...user,
-          pbNum: user.powerbanks.length,
+          pbNum: user.rentals.length,
         }));
         setUsers(mappedUsers);
         setLoading(false);
@@ -54,9 +62,42 @@ export default function UsersPage() {
         setLoading(false);
       }
     };
+    const fetchCurrentRentals = async () => {
+      setLoading(true);
+      try {
+        const fetchedRentals = await api.rentals.getCurrentRentals();
+        console.log(fetchedRentals);
+        const mappedRentals = fetchedRentals.map((rental) => ({
+          ...rental,
+          currentPrice:
+            (Math.ceil(
+              moment().diff(moment(rental.startedAt), "seconds") / 3600
+            ) *
+              rental.basePrice) /
+            100,
+          userName: `${rental.holdingUser.firstName} ${rental.holdingUser.lastName}`,
+        }));
+        setRentals(mappedRentals);
+        setLoading(false);
+      } catch (e) {
+        console.log(e);
+        setLoading(false);
+      }
+    };
     fetchUser();
+    fetchCurrentRentals();
   }, []);
-  const handleRemove = (userId) => async () => {
+  const handleRemoveUser = (userId) => async () => {
+    setLoading(true);
+    try {
+      console.log(userId);
+      setLoading(false);
+    } catch (e) {
+      console.log(e);
+      setLoading(false);
+    }
+  };
+  const handleRemoveRental = (userId) => async () => {
     setLoading(true);
     try {
       console.log(userId);
@@ -71,13 +112,18 @@ export default function UsersPage() {
       <Loader loading={loading} />
       <SimpleGrid
         mb="20px"
-        columns={{ sm: 1, md: 1 }}
+        columns={{ sm: 1, md: 2 }}
         spacing={{ base: "20px", xl: "20px" }}
       >
         <UsersTable
           columnsData={columns}
           tableData={users}
-          handleRemove={handleRemove}
+          handleRemove={handleRemoveUser}
+        />
+        <RentalsTable
+          columnsData={rentalColumns}
+          tableData={rentals}
+          handleRemove={handleRemoveRental}
         />
       </SimpleGrid>
     </Box>
